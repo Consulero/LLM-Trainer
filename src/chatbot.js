@@ -1,43 +1,70 @@
 const { getOpenaiClient } = require('./openaiClient');
-const { queryAzureSearch } = require('./azureCognitive');
 
-async function chatbot(queryTerm, carModel) {
+async function chatbot(userPrompt) {
   try {
-    const result = await queryAzureSearch(queryTerm);
-    const dataFromSearch = result?.value[0]?.content; // considertion top one result from azure cognitive search
     const client = getOpenaiClient();
+    const azureSearchEndpoint = 'https://llmtrainersearchservice.search.windows.net';
+    const azureSearchIndexName = 'trainllm';
 
-    const userPrompt = dataFromSearch
-      ? `Decline unauthentic query and you can use below dataset to answer if helpful but car model must match with below dataset \n""${dataFromSearch}""\nUser query is: ${queryTerm}`
-      : //  `Use your knowledge base and context below in double quotes to answer. User has an EV car model ${carModel}.\n""${dataFromSearch}""\nUser query: ${queryTerm}`
-        `User has EV car as ${carModel} \nUser query: ${queryTerm}`;
+    console.info(`User Prompt: \n${userPrompt}\n`);
 
-    // console.info(`User prompt: \n${userPrompt}\n\n`);
-    console.info(`User query: \n${queryTerm}\n\n`);
-
-    const res = await client.chat.completions.create({
+    let res = await client.chat.completions.create({
       messages: [
         {
           role: 'system',
-          content: `You are an AI assistant for electric vehicle queries only. Decline unrelated questions and ask for clarification if needed.Make sure user car model is correct.`,
+          content: `You are a specialized AI assistant focused exclusively on electric vehicle services and repair-related inquiries. Politely decline any questions that are outside this domain and request clarification if the user’s query is ambiguous. Verify the user's car model to ensure responses are accurate and tailored to the correct vehicle specifications. Whenever possible, offer clear, step-by-step guidance for troubleshooting and resolving issues.`,
         },
         {
           role: 'user',
           content: userPrompt,
         },
       ],
-
-      max_tokens: 800,
+      data_sources: [
+        {
+          type: 'azure_search',
+          parameters: {
+            endpoint: azureSearchEndpoint,
+            index_name: azureSearchIndexName,
+            authentication: {
+              type: 'system_assigned_managed_identity',
+            },
+          },
+        },
+      ],
+      max_tokens: 900,
       temperature: 0.7,
       top_p: 0.95,
       frequency_penalty: 0,
       presence_penalty: 0,
-      stop: null,
     });
 
     const response = res.choices[0]?.message?.content;
 
-    console.info(`Chatbot response: \n${response}\n\n`);
+    nullContent = 'The requested information is not available in the retrieved data. Please try another query or topic';
+    if (response && response != '' && !response.includes(nullContent)) {
+      console.info(`Chatbot response from Azure Search: \n${response}\n\n`);
+    } else {
+      res = await client.chat.completions.create({
+        messages: [
+          {
+            role: 'system',
+            content: `You are an AI assistant for electric vehicle queries only ask for clarification if needed.`,
+          },
+          {
+            role: 'user',
+            content: userPrompt,
+          },
+        ],
+        max_tokens: 1500,
+        temperature: 0.7,
+        top_p: 0.95,
+        frequency_penalty: 0,
+        presence_penalty: 0,
+      });
+
+      const fallbackResponse = res.choices[0]?.message?.content;
+      console.info(`Fine-tuned model response: \n${fallbackResponse}\n\n`);
+    }
   } catch (error) {
     console.error('Chatbot error:', error.response?.data || error.message);
     throw error;
@@ -46,13 +73,8 @@ async function chatbot(queryTerm, carModel) {
 
 (async () => {
   try {
-    const query = 'How do I add a new key card for tesla'
-    // const query='What can applying WD-40 to door handle pivot pins in severe winter conditions help prevent?'
-    // const query = 'How do I disconnect the electrical connector from the low voltage battery';
-    // const query = 'Which medicine should I take fever?';
-    // const query = 'What is burnishing the brakes';
-    // const query = 'What is the purpose of calibrating windows in Tesla Model 3';
-    await chatbot(query, 'Tesla model 3');
+    const prompt = 'how are you?';
+    await chatbot(prompt);
   } catch (error) {
     console.error('Error calling chatbot:', error);
   }
