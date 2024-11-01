@@ -40,7 +40,7 @@ async function chatbot(userPrompt) {
 
     const response = res.choices[0]?.message?.content;
 
-    nullContent = 'The requested information is not available in the retrieved data. Please try another query or topic';
+    nullContent = 'The requested information is not available in the retrieved data';
     if (response && response != '' && !response.includes(nullContent)) {
       console.info(`Chatbot response from Azure Search: \n${response}\n\n`);
     } else {
@@ -55,7 +55,7 @@ async function chatbot(userPrompt) {
             content: userPrompt,
           },
         ],
-        max_tokens: 1500,
+        max_tokens: 1000,
         temperature: 0.7,
         top_p: 0.95,
         frequency_penalty: 0,
@@ -73,7 +73,8 @@ async function chatbot(userPrompt) {
 
 (async () => {
   try {
-    const prompt = 'how are you?';
+    // const prompt = 'how are you?';
+    const prompt = 'how to add key in tesla model 3?';
     await chatbot(prompt);
   } catch (error) {
     console.error('Error calling chatbot:', error);
