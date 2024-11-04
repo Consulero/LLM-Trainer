@@ -38,8 +38,8 @@ async function chatbot(userPrompt) {
       presence_penalty: 0,
     });
 
-    const response = res.choices[0]?.message?.content;
-
+    const resp = res.choices[0]?.message?.content;
+    const response = resp.replace(/\[doc\d+\]/g, '');
     nullContent = 'The requested information is not available in the retrieved data';
     if (response && response != '' && !response.includes(nullContent)) {
       console.info(`Chatbot response from Azure Search: \n${response}\n\n`);
@@ -73,8 +73,10 @@ async function chatbot(userPrompt) {
 
 (async () => {
   try {
-    // const prompt = 'how are you?';
+    // const prompt = 'I need medcine?';
     const prompt = 'how to add key in tesla model 3?';
+    // const query = 'how to add key for tesla model S?';
+    // const query = 'What about Gen 2 Mobile Connector Status Lights';
     await chatbot(prompt);
   } catch (error) {
     console.error('Error calling chatbot:', error);
