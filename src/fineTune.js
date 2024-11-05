@@ -4,13 +4,11 @@ const { AZURE_OPENAI_API_KEY, AZURE_OPENAI_ENDPOINT, AZURE_OPENAI_API_VERSION, A
 const fineTuneJob = async () => {
   try {
     const fineTuneParams = {
-      model: 'gpt-35-turbo-0613.ft-acaad371be7f43589c32caba9d31b07f-rnc',
-      training_file: 'file-feb84cb2225443a2abaf29a7cb71a4fc', // when upload to azure openai connection
-      validation_file: null,
-      hyperparameters: {
-        n_epochs: 1,
-        batch_size: 32,
-      },
+      model: 'gpt-4o-2024-08-06.ft-e77ee82925a54ad1a0f49f62521a8bd7-tesla_three',
+      training_file: 'file-6b7bc7c100f446ab832a242352e2e260', // when upload to azure openai connection
+      suffix: 'tesla_s', //change accordingly for each model
+      validation_file: null, // optional
+      hyperparameters: null, // will use default
     };
 
     const response = await axios.post(`${AZURE_OPENAI_ENDPOINT}/openai/fine_tuning/jobs?api-version=${AZURE_OPENAI_API_VERSION}`, fineTuneParams, {

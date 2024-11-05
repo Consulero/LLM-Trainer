@@ -2,7 +2,7 @@ require('dotenv').config();
 const axios = require('axios');
 const { DefaultAzureCredential } = require('@azure/identity');
 
-const DEPLOYMENT_NAME = 'gpt-35-turbo-0613-testing';
+const DEPLOYMENT_NAME = 'gpt-4o-2024-08-06-tesla_s';
 async function deployModel() {
   try {
     const credential = new DefaultAzureCredential();
@@ -19,7 +19,7 @@ async function deployModel() {
         properties: {
           model: {
             format: 'OpenAI',
-            name: 'gpt-35-turbo-0613.ft-0752caba317841a4ab5e0c261794ae15-updated',
+            name: 'gpt-4o-2024-08-06-tesla_s',
             version: '1',
           },
         },

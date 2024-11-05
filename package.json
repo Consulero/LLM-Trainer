@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "develop": "node src/chatbot.js"
+    "develop": "node src/deployModelNew.js"
   },
   "keywords": [],
   "author": "",
@@ -15,6 +15,7 @@
     "@azure/openai": "^2.0.0-beta.2",
     "@azure/storage-blob": "^12.25.0",
     "axios": "^1.7.7",
+    "azure-openai": "^0.9.4",
     "dotenv": "^16.4.5",
     "openai": "^4.67.3",
     "pdf-parse": "^1.1.1"
